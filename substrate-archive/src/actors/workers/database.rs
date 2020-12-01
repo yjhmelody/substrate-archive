@@ -93,11 +93,11 @@ impl<B: BlockT> DatabaseActor<B> {
 		let mut conn = self.db.conn().await?;
 		let mut block_nums: Vec<u32> = storage.iter().map(|s| s.block_num()).collect();
 		block_nums.sort_unstable();
-		log::debug!("Inserting: {:#?}, {} .. {}", block_nums.len(), block_nums[0], block_nums.last().unwrap());
+		log::info!("Inserting: {:#?}, {} .. {}", block_nums.len(), block_nums[0], block_nums.last().unwrap());
 		let len = block_nums.len();
 		while queries::has_blocks::<B>(block_nums.as_slice(), &mut conn).await?.len() != len {
 			smol::Timer::new(std::time::Duration::from_millis(50)).await;
-		}
+        }
 		// we drop the connection early so that the insert() has the use of all db connections
 		std::mem::drop(conn);
 		let storage = Vec::<StorageModel<B>>::from(VecStorageWrap(storage));

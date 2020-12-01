@@ -30,7 +30,7 @@ use substrate_archive_common::Result;
 pub async fn migrate<T: ToString>(conf: T) -> Result<String> {
 	let url = conf.to_string();
 	let mut conn = PgConnection::connect(&url).await?;
-	sqlx::migrate!("./src/migrations/").run(&mut conn).await?;
+    sqlx::migrate!("./src/migrations/").run(&mut conn).await?;
 	Ok(url)
 }
 
