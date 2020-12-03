@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-archive.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::{actors::System, traits};
+use crate::{actors::System, traits,kafka::KafkaConfig};
 use sc_chain_spec::ChainSpec;
 use sc_client_api::backend as api_backend;
 use sc_executor::NativeExecutionDispatch;
@@ -51,7 +51,9 @@ pub struct Builder<B, R, D, DB> {
 	pub chain_spec: Option<Box<dyn ChainSpec>>,
 	pub _marker: PhantomData<(B, R, D, DB)>,
 	/// maximimum amount of blocks to index at once
-	pub max_block_load: Option<u32>,
+    pub max_block_load: Option<u32>,
+    /// Kafak publish
+    pub kafka_list:Option<Vec<KafkaConfig>>
 }
 
 impl<B, R, D, DB> Default for Builder<B, R, D, DB> {
@@ -64,7 +66,8 @@ impl<B, R, D, DB> Default for Builder<B, R, D, DB> {
 			wasm_pages: None,
 			chain_spec: None,
 			_marker: PhantomData,
-			max_block_load: None,
+            max_block_load: None,
+            kafka_list:None
 		}
 	}
 }
@@ -202,7 +205,7 @@ where
 		let cache_size = self.cache_size.unwrap_or(128);
 		let block_workers = self.block_workers.unwrap_or(num_cpus);
 		let wasm_pages = self.wasm_pages.unwrap_or(64 * num_cpus as u64);
-		let max_block_load = self.max_block_load.unwrap_or(100_000);
+        let max_block_load = self.max_block_load.unwrap_or(100_000);
 		let db_path = create_database_path(self.chain_spec)?;
 		smol::block_on(crate::migrations::migrate(&pg_url))?;
 		let db = Arc::new(DB::open_database(chain_path.as_str(), cache_size, db_path)?);
@@ -211,7 +214,7 @@ where
 		let backend = Arc::new(ReadOnlyBackend::new(db, true));
 		Self::startup_info(&*client, &*backend)?;
 
-		let ctx = System::<_, R, _, _>::new(client, backend, block_workers, pg_url.as_str(), max_block_load)?;
+		let ctx = System::<_, R, _, _>::new(client, backend, block_workers, pg_url.as_str(), max_block_load,self.kafka_list)?;
 		Ok(ctx)
 	}
 

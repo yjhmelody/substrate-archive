@@ -17,14 +17,15 @@
 //! Module that accepts individual storage entries and wraps them up into batch requests for
 //! Postgres
 
-use super::{ActorPool, DatabaseActor};
+use super::{ActorPool, DatabaseActor,KafkaPublishActor};
 use crate::actors::msg::VecStorageWrap;
 use sp_runtime::traits::Block as BlockT;
 use substrate_archive_common::{types::Storage, Result};
 use xtra::prelude::*;
 
 pub struct StorageAggregator<B: BlockT + Unpin> {
-	db: Address<ActorPool<DatabaseActor<B>>>,
+    db: Address<ActorPool<DatabaseActor<B>>>,
+    publish:Address<KafkaPublishActor<B>>,
 	storage: Vec<Storage<B>>,
 }
 
@@ -32,8 +33,8 @@ impl<B: BlockT + Unpin> StorageAggregator<B>
 where
 	B::Hash: Unpin,
 {
-	pub fn new(db: Address<ActorPool<DatabaseActor<B>>>) -> Self {
-		Self { db, storage: Vec::with_capacity(500) }
+	pub fn new(db: Address<ActorPool<DatabaseActor<B>>>,publish:Address<KafkaPublishActor<B>>) -> Self {
+		Self { db,publish, storage: Vec::with_capacity(500) }
 	}
 }
 
@@ -87,9 +88,12 @@ where
 		let storage = std::mem::take(&mut self.storage);
 		if !storage.is_empty() {
 			log::info!("Indexing storage {} bps", storage.len());
-			if let Err(e) = self.db.send(VecStorageWrap(storage).into()).await {
-				log::error!("{:?}", e);
-			}
+			if let Err(e) = self.db.send(VecStorageWrap(storage.clone()).into()).await {
+				log::error!("StorageAggregator db.send {:?}", e);
+            }
+            if let Err(e) = self.publish.send(VecStorageWrap(storage).into()).await {
+				log::error!("StorageAggregator publish.send {:?}", e);
+            }
 		}
 	}
 }
