@@ -19,6 +19,7 @@ use anyhow::Result;
 use serde::Deserialize;
 use std::path::{Path, PathBuf};
 use substrate_archive::MigrationConfig;
+use substrate_archive::KafkaConfig;
 
 #[derive(Debug, Clone, Deserialize)]
 struct TomlConfig {
@@ -33,7 +34,8 @@ struct TomlConfig {
 	db_pass: Option<String>,
 	westend_db: Option<String>,
 	kusama_db: Option<String>,
-	polkadot_db: Option<String>,
+    polkadot_db: Option<String>,
+	kafka: Option<Vec<KafkaConfig>>
 }
 
 impl TomlConfig {
@@ -63,7 +65,8 @@ pub struct Config {
 	cache_size: Option<usize>,
 	block_workers: Option<usize>,
 	wasm_pages: Option<u64>,
-	max_block_load: Option<u32>,
+    max_block_load: Option<u32>,
+    kafka_list: Option<Vec<KafkaConfig>>
 }
 
 impl Config {
@@ -79,7 +82,8 @@ impl Config {
 			cache_size: toml_conf.as_ref().map(|c| c.cache_size),
 			block_workers: toml_conf.as_ref().map(|c| c.block_workers).flatten(),
 			wasm_pages: toml_conf.as_ref().map(|c| c.wasm_pages).flatten(),
-			max_block_load: toml_conf.as_ref().map(|c| c.max_block_load).flatten(),
+            max_block_load: toml_conf.as_ref().map(|c| c.max_block_load).flatten(),
+			kafka_list: toml_conf.as_ref().map(|c| c.kafka.clone()).flatten(),
 		})
 	}
 
@@ -114,5 +118,8 @@ impl Config {
 
 	pub fn max_block_load(&self) -> Option<u32> {
 		self.max_block_load
+    }
+    pub fn kafka_list(&self) -> Option<Vec<KafkaConfig>> {
+		self.kafka_list.clone()
 	}
 }
