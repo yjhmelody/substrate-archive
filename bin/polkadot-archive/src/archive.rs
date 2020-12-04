@@ -41,7 +41,7 @@ pub fn run_archive<D: ReadOnlyDB + 'static>(config: Config) -> Result<Box<dyn Ar
 	match last_path_part {
 		"polkadot" => db_path.push(format!("chains/{}/db", spec.id())),
 		"chains" => db_path.push(format!("{}/db", spec.id())),
-		_ => return Err(anyhow!("invalid path {}", db_path.as_path().display())),
+		_ => return Err(anyhow!("invalid path {} {}", db_path.as_path().display(),last_path_part)),
 	}
 
 	let db_path = db_path.as_path().to_str().context("could not convert rocksdb path to str")?.to_string();
@@ -81,7 +81,8 @@ pub fn run_archive<D: ReadOnlyDB + 'static>(config: Config) -> Result<Box<dyn Ar
 				cache_size: config.cache_size(),
 				block_workers: config.block_workers(),
 				wasm_pages: config.wasm_pages(),
-				max_block_load: config.max_block_load(),
+                max_block_load: config.max_block_load(),
+                kafka_list:config.kafka_list(),
 				..ArchiveBuilder::default()
 			}
 			.chain_data_db(db_path)
