@@ -113,8 +113,7 @@ where
 	metadata: Address<workers::Metadata<B>>,
 	db_pool: Address<ActorPool<DatabaseActor<B>>>,
 	kafka_publish: Address<workers::KafkaPublishActor<B>>,
-	extrinsics:Address<workers::ExtrinsicsActor<B>>,
-
+	extrinsics: Address<workers::ExtrinsicsActor<B>>,
 }
 
 /// Control the execution of the indexing engine.
@@ -236,12 +235,12 @@ where
 
 		let db = workers::DatabaseActor::<B>::new(ctx.pg_url().into()).await?;
 		let db_pool = actor_pool::ActorPool::new(db, 8).spawn();
-		let extrinsics=workers::ExtrinsicsActor::new(db_pool.clone()).spawn();
+		let extrinsics = workers::ExtrinsicsActor::new(db_pool.clone()).spawn();
 		let storage = workers::StorageAggregator::new(db_pool.clone(), kafka_publish.clone()).spawn();
-		let metadata = workers::Metadata::new(db_pool.clone(), extrinsics.clone(),ctx.meta().clone()).await?.spawn();
+		let metadata = workers::Metadata::new(db_pool.clone(), extrinsics.clone(), ctx.meta().clone()).await?.spawn();
 		let blocks = workers::BlocksIndexer::new(ctx, db_pool.clone(), metadata.clone()).spawn();
 
-		Ok(Actors { storage, blocks, metadata, db_pool, kafka_publish,extrinsics })
+		Ok(Actors { storage, blocks, metadata, db_pool, kafka_publish, extrinsics })
 	}
 
 	async fn kill_actors(actors: Actors<B, D>) -> Result<()> {

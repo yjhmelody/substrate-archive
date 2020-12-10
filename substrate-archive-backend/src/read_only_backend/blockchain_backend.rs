@@ -91,8 +91,8 @@ impl<Block: BlockT, D: ReadOnlyDB> BlockchainBackend<Block> for ReadOnlyBackend<
 	}
 }
 
-impl <Block: BlockT, D: ReadOnlyDB>   ReadOnlyBackend<Block, D> {
-    pub fn best(&self) -> ChainResult<<<Block as BlockT>::Header as HeaderT>::Number> {
+impl<Block: BlockT, D: ReadOnlyDB> ReadOnlyBackend<Block, D> {
+	pub fn best(&self) -> ChainResult<<<Block as BlockT>::Header as HeaderT>::Number> {
 		Ok(util::read_meta::<Block, D>(&*self.db, columns::HEADER)?.best_number)
 	}
 }

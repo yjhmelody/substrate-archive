@@ -20,18 +20,18 @@
 mod actors;
 pub mod archive;
 mod database;
+mod kafka;
 mod migrations;
 mod sql_block_builder;
 mod tasks;
 mod traits;
-mod kafka;
 
 pub use actors::System;
 pub use archive::Builder as ArchiveBuilder;
 pub use database::queries;
+pub use kafka::{KafkaConfig, KafkaProducer};
 pub use migrations::MigrationConfig;
 pub use traits::Archive;
-pub use kafka::{KafkaConfig,KafkaProducer};
 
 #[cfg(feature = "logging")]
 pub use substrate_archive_common::util::init_logger;

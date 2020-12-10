@@ -21,121 +21,127 @@ use sp_storage::{StorageData, StorageKey};
 
 #[derive(Encode, Decode, Debug, Clone)]
 pub struct Extrinsic<B: BlockT> {
-    pub hash: B::Hash,
-    pub block_num: u32,
-    pub index: u32,
-    pub address: Vec<u8>,
-    pub signature: Vec<u8>,
-    pub extra: Vec<u8>,
-    pub function: Vec<u8>,
+	pub hash: B::Hash,
+	pub block_num: u32,
+	pub index: u32,
+	pub address: Vec<u8>,
+	pub signature: Vec<u8>,
+	pub extra: Vec<u8>,
+	pub function: Vec<u8>,
 }
 
 impl<B: BlockT> Extrinsic<B> {
-    pub fn new_signed(hash: B::Hash,
-                      block_num: u32, index: u32, address: Vec<u8>, signature: Vec<u8>, extra: Vec<u8>, function: Vec<u8>) -> Self {
-        Self { hash, block_num, index, address, signature, extra, function }
-    }
-    pub fn new_unsigned(hash: B::Hash,
-                        block_num: u32, index: u32, call: Vec<u8>) -> Self {
-        Self { hash, block_num, index, address: vec![], signature: vec![], extra: vec![], function: call }
-    }
+	pub fn new_signed(
+		hash: B::Hash,
+		block_num: u32,
+		index: u32,
+		address: Vec<u8>,
+		signature: Vec<u8>,
+		extra: Vec<u8>,
+		function: Vec<u8>,
+	) -> Self {
+		Self { hash, block_num, index, address, signature, extra, function }
+	}
+	pub fn new_unsigned(hash: B::Hash, block_num: u32, index: u32, call: Vec<u8>) -> Self {
+		Self { hash, block_num, index, address: vec![], signature: vec![], extra: vec![], function: call }
+	}
 }
 
 #[derive(Debug, Clone)]
 pub struct BatchExtrinsic<B: BlockT> {
-    pub inner: Vec<Extrinsic<B>>,
+	pub inner: Vec<Extrinsic<B>>,
 }
 
 impl<B: BlockT> BatchExtrinsic<B> {
-    pub fn new(extrinsics: Vec<Extrinsic<B>>) -> Self {
-        Self { inner: extrinsics }
-    }
+	pub fn new(extrinsics: Vec<Extrinsic<B>>) -> Self {
+		Self { inner: extrinsics }
+	}
 
-    pub fn inner(&self) -> &Vec<Extrinsic<B>> {
-        &self.inner
-    }
+	pub fn inner(&self) -> &Vec<Extrinsic<B>> {
+		&self.inner
+	}
 }
 
 #[derive(Encode, Decode, Debug, Clone)]
 pub struct Block<B: BlockT> {
-    pub inner: SignedBlock<B>,
-    pub spec: u32,
+	pub inner: SignedBlock<B>,
+	pub spec: u32,
 }
 
 impl<B: BlockT> Block<B> {
-    pub fn new(block: SignedBlock<B>, spec: u32) -> Self {
-        Self { inner: block, spec }
-    }
+	pub fn new(block: SignedBlock<B>, spec: u32) -> Self {
+		Self { inner: block, spec }
+	}
 }
 
 #[derive(Debug)]
 pub struct Metadata {
-    version: u32,
-    meta: Vec<u8>,
+	version: u32,
+	meta: Vec<u8>,
 }
 
 impl Metadata {
-    pub fn new(version: u32, meta: Vec<u8>) -> Self {
-        Self { version, meta }
-    }
+	pub fn new(version: u32, meta: Vec<u8>) -> Self {
+		Self { version, meta }
+	}
 
-    pub fn version(&self) -> u32 {
-        self.version
-    }
+	pub fn version(&self) -> u32 {
+		self.version
+	}
 
-    pub fn meta(&self) -> &[u8] {
-        self.meta.as_slice()
-    }
+	pub fn meta(&self) -> &[u8] {
+		self.meta.as_slice()
+	}
 }
 
 /// NewType for committing many blocks to the database at once
 #[derive(Debug, Clone)]
 pub struct BatchBlock<B: BlockT> {
-    pub inner: Vec<Block<B>>,
+	pub inner: Vec<Block<B>>,
 }
 
 impl<B: BlockT> BatchBlock<B> {
-    pub fn new(blocks: Vec<Block<B>>) -> Self {
-        Self { inner: blocks }
-    }
+	pub fn new(blocks: Vec<Block<B>>) -> Self {
+		Self { inner: blocks }
+	}
 
-    pub fn inner(&self) -> &Vec<Block<B>> {
-        &self.inner
-    }
+	pub fn inner(&self) -> &Vec<Block<B>> {
+		&self.inner
+	}
 }
 
 /// NewType for Storage Data
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct Storage<Block: BlockT> {
-    hash: Block::Hash,
-    block_num: u32,
-    full_storage: bool,
-    pub changes: Vec<(StorageKey, Option<StorageData>)>,
+	hash: Block::Hash,
+	block_num: u32,
+	full_storage: bool,
+	pub changes: Vec<(StorageKey, Option<StorageData>)>,
 }
 
 impl<Block: BlockT> Storage<Block> {
-    pub fn new(
-        hash: Block::Hash,
-        block_num: u32,
-        full_storage: bool,
-        changes: Vec<(StorageKey, Option<StorageData>)>,
-    ) -> Self {
-        Self { block_num, hash, full_storage, changes }
-    }
+	pub fn new(
+		hash: Block::Hash,
+		block_num: u32,
+		full_storage: bool,
+		changes: Vec<(StorageKey, Option<StorageData>)>,
+	) -> Self {
+		Self { block_num, hash, full_storage, changes }
+	}
 
-    pub fn is_full(&self) -> bool {
-        self.full_storage
-    }
+	pub fn is_full(&self) -> bool {
+		self.full_storage
+	}
 
-    pub fn block_num(&self) -> u32 {
-        self.block_num
-    }
+	pub fn block_num(&self) -> u32 {
+		self.block_num
+	}
 
-    pub fn hash(&self) -> &Block::Hash {
-        &self.hash
-    }
+	pub fn hash(&self) -> &Block::Hash {
+		&self.hash
+	}
 
-    pub fn changes(&self) -> &[(StorageKey, Option<StorageData>)] {
-        self.changes.as_slice()
-    }
+	pub fn changes(&self) -> &[(StorageKey, Option<StorageData>)] {
+		self.changes.as_slice()
+	}
 }
