@@ -19,6 +19,7 @@ mod database;
 mod metadata;
 mod storage_aggregator;
 mod kafka_publish;
+mod extrinsics;
 
 /// Database message to get state internal database state
 pub use self::database::*;
@@ -27,6 +28,7 @@ pub use blocks::*;
 pub use database::*;
 pub use storage_aggregator::*;
 pub use kafka_publish::*;
+pub use extrinsics::*;
 
 use super::actor_pool::ActorPool;
 use super::msg::Die;
